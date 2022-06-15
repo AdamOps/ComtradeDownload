@@ -3,6 +3,11 @@ import json
 country_list = {
     "results": [
         {
+            "id": "World",
+            "text": "World"
+        },
+
+        {
             "id": "4",
             "text": "Afghanistan"
         },

@@ -1,80 +1,72 @@
-import pandas as pd
+import math
+import time
 import requests
+import os
+import pandas as pd
 
-urlList = []
+import functions
+import comtrade_country_list as cclist
 
+os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
 
-def set_params(reporter="all",
-               partners="97",
-               frequency="A",
-               year="2021",
-               imports_or_exports="1",
-               goods_or_services="C",
-               classification="HS",
-               classification_code="AG6",
-               return_format="csv",
-               max_return="10000",
-               heading_style="H",
-               auth_token="",
-               imts_definition="2010"):
-    parameters = {
-        "r": reporter,
-        "freq": frequency,
-        "ps": year,
-        "px": classification,
-        "p": partners,
-        "rg": imports_or_exports,
-        "cc": classification_code,
-        "fmt": return_format,
-        "max": max_return,
-        "type": goods_or_services,
-        "head": heading_style,
-        "token": auth_token,
-        "IMTS": imts_definition,
-    }
-
-    return parameters
+# Just for convenience, storing the IDs of all countries in a list.
+# Also storing all request URLs in a list, to then go through them one at a time.
+# Felt like this was the most generalisable version.
+countries = []
+countryNames = []
+urls = []
+for country in cclist.country_list['results']:
+    countries.append(str(country['id']))
+    countryNames.append(str(country['text']))
 
 
-def generate_link(parameters, use_token):
-    url = "http://comtrade.un.org/api/get?" + \
-          "r=" + parameters['r'] + \
-          "&ps=" + parameters['ps'] + \
-          "&freq=" + parameters['freq'] + \
-          "&px=" + parameters['px'] + \
-          "&p=" + parameters['p'] + \
-          "&rg=" + parameters['rg'] + \
-          "&cc=" + parameters['cc'] + \
-          "&fmt=" + parameters['fmt'] + \
-          "&max=" + parameters['max'] + \
-          "&type=" + parameters['type'] + \
-          "&head=" + parameters['head'] + \
-          "&IMTS=" + parameters['IMTS']
+# Fetching trade data for one partner country at a time.
+# You could squeeze in more data per request, but it's unclear how much data each request actually covers
+# E.g., NL->Afghanistan exports are <200 rows. NL->US is well over 1000.
+# Ergo: Easier to go through it one country at a time.
+request_param_list = []
+for country in countries:
+    new_request_params = functions.set_params(reporter=country,
+                                              year="2021",
+                                              frequency="A",
+                                              classification="HS",
+                                              partners="528",
+                                              imports_or_exports="0",
+                                              classification_code="AG6",
+                                              return_format="csv",
+                                              max_return="10000",
+                                              goods_or_services="C",
+                                              heading_style="H",
+                                              imts_definition="2010")
 
-    if parameters['token'] != "":
-        url += "&token=" + parameters['token']
+    request_param_list.append(new_request_params)
+    urls.append(functions.generate_link(new_request_params, False))
 
-    print(url)
-    return url
+counter = 0
+if len(urls) > 90:
+    sleepTime = 36
+else:
+    sleepTime = 2
+for link in urls:
+    newData = requests.get(link)
+    if request_param_list[counter]['rg'] == "1":
+        filename = countryNames[counter] + "_exports_" + request_param_list[counter]['ps'] + ".csv"
+    elif request_param_list[counter]['rg'] == "0":
+        filename = countryNames[counter] + "_imports_" + request_param_list[counter]['ps'] + ".csv"
+    else:
+        print("Invalid parameters. Didn't specify whether it's imports or exports.")
+        break
+    counter += 1
+    print("Retrieved file #", counter, " out of ", len(urls))
+    hours = math.floor((len(urls)-counter)*sleepTime/3600)
+    minutes = math.floor(((len(urls)-counter)*sleepTime - hours*3600)/60)
+    print("Estimated time left: ", hours, "h", minutes)
 
+    df_check = pd.DataFrame(newData)
+    if df_check.loc[1,0] == "No data matches your query or your query is too complex. Request JSON or XML format for more information.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,":
+        continue
+    open(filename, "wb").write(newData.content)
 
-new_request_params = set_params(reporter="528",
-                                year="2021",
-                                frequency="A",
-                                classification="HS",
-                                partners="4",
-                                imports_or_exports="1",
-                                classification_code="AG6",
-                                return_format="csv",
-                                max_return="10000",
-                                goods_or_services="C",
-                                heading_style="H",
-                                imts_definition="2010")
-
-
-new_request_url = generate_link(new_request_params, False)
-response = requests.get(new_request_url)
-
-
-
-# http://comtrade.un.org/api/get?max=50000&type=C&freq=A&px=HS&ps=2013&r=826&p=0&rg=all&cc=AG2&fmt=json
+    # There's a limit to how many requests you can send per hour. With a guest account, it's 100 requests per hour.
+    # With a licensed account, it's 1000.
+    time.sleep(sleepTime)
