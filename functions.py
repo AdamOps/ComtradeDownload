@@ -18,7 +18,7 @@ def set_params(reporter="all",
         frequency: Either annual "A" or monthly "M"
         year: The year you wish to get data for. Pass as string, e.g. "2011". If you're grabbing monthly data,
             pass it as YYYYMM here, e.g. "201206"
-        imports_or_exports: Get either imports "0" or exports "1"
+        imports_or_exports: Get either imports "1" or exports "2"
         goods_or_services: Fetch either goods "C" or services "S"
         classification: Pass whether you want to use the harmonised system "HS" or another format here. "HS" is
             by far the best default, so only change this if you're really sure.
@@ -28,7 +28,7 @@ def set_params(reporter="all",
             "TOTAL", "AG1", "AG2", "AG3", "AG4", "AG5", "AG6", "ALL"
         return_format: Return the data as either "csv" or "json".
         max_return: Maximum length of the returned file. UN also maintains its own limits.
-            For guests this is 10000, for licensed users 250000.
+            For guests this is 100000, for licensed users 250000.
         heading_style: Whether the returned file has human "H" or machine "M" headers.
         auth_token: Your authorization token, if you have one. This is optional.
         imts_definition: Either "2010", or "orig". Best to stick to 2010 here.

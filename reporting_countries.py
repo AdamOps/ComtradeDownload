@@ -1,12 +1,7 @@
 import json
 
-country_list = {
+reporting_country_list = {
     "results": [
-        {
-            "id": "World",
-            "text": "World"
-        },
-
         {
             "id": "4",
             "text": "Afghanistan"
