@@ -34,40 +34,56 @@ def set_params(reporter="all",
         imts_definition: Either "2010", or "orig". Best to stick to 2010 here.
         """
     parameters = {
-        "r": reporter,
-        "freq": frequency,
-        "ps": year,
-        "px": classification,
-        "p": partners,
-        "rg": imports_or_exports,
-        "cc": classification_code,
-        "fmt": return_format,
-        "max": max_return,
-        "type": goods_or_services,
-        "head": heading_style,
-        "token": auth_token,
-        "IMTS": imts_definition,
+        "reporter": reporter,
+        "frequency": frequency,
+        "year": year,
+        "classification": classification,
+        "partners": partners,
+        "imports_or_exports": imports_or_exports,
+        "classification_code": classification_code,
+        "return_format": return_format,
+        "max_return": max_return,
+        "goods_or_services": goods_or_services,
+        "heading_style": heading_style,
+        "auth_token": auth_token,
+        "imts_definition": imts_definition,
     }
+
+    # parameters = {
+    #     "r": reporter,
+    #     "freq": frequency,
+    #     "ps": year,
+    #     "px": classification,
+    #     "p": partners,
+    #     "rg": imports_or_exports,
+    #     "cc": classification_code,
+    #     "fmt": return_format,
+    #     "max": max_return,
+    #     "type": goods_or_services,
+    #     "head": heading_style,
+    #     "token": auth_token,
+    #     "IMTS": imts_definition,
+    # }
 
     return parameters
 
 
 def generate_link(parameters, use_token):
     url = "http://comtrade.un.org/api/get?" + \
-          "r=" + parameters['r'] + \
-          "&ps=" + parameters['ps'] + \
-          "&freq=" + parameters['freq'] + \
-          "&px=" + parameters['px'] + \
-          "&p=" + parameters['p'] + \
-          "&rg=" + parameters['rg'] + \
-          "&cc=" + parameters['cc'] + \
-          "&fmt=" + parameters['fmt'] + \
-          "&max=" + parameters['max'] + \
-          "&type=" + parameters['type'] + \
-          "&head=" + parameters['head'] + \
-          "&IMTS=" + parameters['IMTS']
+          "r=" + parameters['reporter'] + \
+          "&ps=" + parameters['year'] + \
+          "&freq=" + parameters['frequency'] + \
+          "&px=" + parameters['classification'] + \
+          "&p=" + parameters['partners'] + \
+          "&rg=" + parameters['imports_or_exports'] + \
+          "&cc=" + parameters['classification_code'] + \
+          "&fmt=" + parameters['return_format'] + \
+          "&max=" + parameters['max_return'] + \
+          "&type=" + parameters['goods_or_services'] + \
+          "&head=" + parameters['heading_style'] + \
+          "&IMTS=" + parameters['imts_definition']
 
-    if parameters['token'] != "":
-        url += "&token=" + parameters['token']
+    if parameters['auth_token'] != "":
+        url += "&token=" + parameters['auth_token']
 
     return url

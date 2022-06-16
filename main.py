@@ -9,8 +9,8 @@ from reporting_countries import reporting_country_list
 from partner_countries import partner_country_list
 
 
-# os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
-os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
+os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
+# os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
 
 # Just for convenience, storing the IDs of all countries in a list.
 # Also storing all request URLs in a list, to then go through them one at a time.
@@ -59,17 +59,17 @@ else:
 for link in urls:
     print(link)
     newData = requests.get(link)
-    if request_param_list[counter]['rg'] == "2":
-        filename = reporting_countries_names[counter] + "_exports_" + request_param_list[counter]['ps']
-    elif request_param_list[counter]['rg'] == "1":
-        filename = reporting_countries_names[counter] + "_imports_" + request_param_list[counter]['ps']
+    if request_param_list[counter]['imports_or_exports'] == "2":
+        filename = reporting_countries_names[counter] + "_exports_" + request_param_list[counter]['year']
+    elif request_param_list[counter]['imports_or_exports'] == "1":
+        filename = reporting_countries_names[counter] + "_imports_" + request_param_list[counter]['year']
     else:
         print("Invalid parameters. Didn't specify whether it's imports (1) or exports (2).")
         break
 
-    if request_param_list[counter]['fmt'] == "csv":
+    if request_param_list[counter]['return_format'] == "csv":
         filename += ".csv"
-    elif request_param_list[counter]['fmt'] == "json":
+    elif request_param_list[counter]['return_format'] == "json":
         filename += ".json"
     else:
         print("Invalid parameters. File-type not recognised. Set the return_format to either json or csv.")
