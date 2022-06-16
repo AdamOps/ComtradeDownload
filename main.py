@@ -42,7 +42,7 @@ for country in reporting_countries_id:
                                               partners="0",
                                               imports_or_exports="2",
                                               classification_code="AG6",
-                                              return_format="csv",
+                                              return_format="json",
                                               max_return="10000",
                                               goods_or_services="C",
                                               heading_style="H",
@@ -60,21 +60,25 @@ for link in urls:
     print(link)
     newData = requests.get(link)
     if request_param_list[counter]['rg'] == "2":
-        filename = reporting_countries_names[counter] + "_exports_" + request_param_list[counter]['ps'] + ".csv"
+        filename = reporting_countries_names[counter] + "_exports_" + request_param_list[counter]['ps']
     elif request_param_list[counter]['rg'] == "1":
-        filename = reporting_countries_names[counter] + "_imports_" + request_param_list[counter]['ps'] + ".csv"
+        filename = reporting_countries_names[counter] + "_imports_" + request_param_list[counter]['ps']
     else:
-        print("Invalid parameters. Didn't specify whether it's imports or exports.")
+        print("Invalid parameters. Didn't specify whether it's imports (1) or exports (2).")
+        break
+
+    if request_param_list[counter]['fmt'] == "csv":
+        filename += ".csv"
+    elif request_param_list[counter]['fmt'] == "json":
+        filename += ".json"
+    else:
+        print("Invalid parameters. File-type not recognised. Set the return_format to either json or csv.")
         break
     counter += 1
     print("Retrieved file #", counter, " out of ", len(urls))
     hours = math.floor((len(urls)-counter)*sleepTime/3600)
     minutes = math.floor(((len(urls)-counter)*sleepTime - hours*3600)/60)
     print("Estimated time left: ", hours, "h", minutes)
-
-    df_check = pd.DataFrame(newData)
-    if df_check.loc[1,0] == "No data matches your query or your query is too complex. Request JSON or XML format for more information.,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,":
-        continue
     open(filename, "wb").write(newData.content)
 
     # There's a limit to how many requests you can send per hour. With a guest account, it's 100 requests per hour.
