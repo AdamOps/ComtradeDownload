@@ -9,8 +9,15 @@ from reporting_countries import reporting_country_list
 from partner_countries import partner_country_list
 
 
-os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
-# os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
+# Parameters
+# Did Comtrade disconnect again?
+comtrade_disconnected = True
+disconnect_number = 0
+all_countries = False
+last_country = 130
+
+# os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
+os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
 
 # Just for convenience, storing the IDs of all countries in a list.
 # Also storing all request URLs in a list, to then go through them one at a time.
@@ -28,19 +35,25 @@ for country in partner_country_list['results']:
     partner_countries_id.append(str(country['id']))
     partner_countries_names.append(str(country['text']))
 
-
 # Fetching trade data for one partner country at a time.
 # You could squeeze in more data per request, but it's unclear how much data each request actually covers
 # E.g., NL->Afghanistan exports are <200 rows. NL->US is well over 1000.
 # Ergo: Easier to go through it one country at a time.
 request_param_list = []
+
+if comtrade_disconnected:
+    if all_countries:
+        reporting_countries_id = reporting_countries_id[disconnect_number:]
+    else:
+        reporting_countries_id = reporting_countries_id[disconnect_number:last_country]
+
 for country in reporting_countries_id:
     new_request_params = functions.set_params(reporter=country,
                                               year="2019",
                                               frequency="A",
                                               classification="HS",
-                                              partners="0",
-                                              imports_or_exports="2",
+                                              partners="528",
+                                              imports_or_exports="1",
                                               classification_code="AG6",
                                               return_format="json",
                                               max_return="10000",
