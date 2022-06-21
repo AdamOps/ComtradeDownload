@@ -11,10 +11,10 @@ from partner_countries import partner_country_list
 
 # Parameters
 # Did Comtrade disconnect again?
-comtrade_disconnected = True
+comtrade_disconnected = False
 disconnect_number = 0
-all_countries = False
-last_country = 130
+all_countries = True
+last_country = 0
 
 # os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
 os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
@@ -44,16 +44,18 @@ request_param_list = []
 if comtrade_disconnected:
     if all_countries:
         reporting_countries_id = reporting_countries_id[disconnect_number:]
+        reporting_countries_names = reporting_countries_names[disconnect_number:]
     else:
         reporting_countries_id = reporting_countries_id[disconnect_number:last_country]
+        reporting_countries_names = reporting_countries_names[disconnect_number:last_country]
 
 for country in reporting_countries_id:
     new_request_params = functions.set_params(reporter=country,
-                                              year="2019",
+                                              year="2021",
                                               frequency="A",
                                               classification="HS",
-                                              partners="528",
-                                              imports_or_exports="1",
+                                              partners="0",
+                                              imports_or_exports="2",
                                               classification_code="AG6",
                                               return_format="json",
                                               max_return="10000",
@@ -66,16 +68,16 @@ for country in reporting_countries_id:
 
 counter = 0
 if len(urls) > 90:
-    sleepTime = 36
+    sleepTime = 37
 else:
     sleepTime = 2
 for link in urls:
     print(link)
     newData = requests.get(link)
     if request_param_list[counter]['imports_or_exports'] == "2":
-        filename = reporting_countries_names[counter] + "_exports_" + request_param_list[counter]['year']
+        filename = request_param_list[counter]['reporter'] + "_exports_to_" + request_param_list[counter]['partners'] + "_" + request_param_list[counter]['year']
     elif request_param_list[counter]['imports_or_exports'] == "1":
-        filename = reporting_countries_names[counter] + "_imports_" + request_param_list[counter]['year']
+        filename = request_param_list[counter]['reporter'] + "_imports_from_" + request_param_list[counter]['partners'] + "_" + request_param_list[counter]['year']
     else:
         print("Invalid parameters. Didn't specify whether it's imports (1) or exports (2).")
         break
