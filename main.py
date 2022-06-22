@@ -11,8 +11,8 @@ from partner_countries import partner_country_list
 
 # Parameters
 # Did Comtrade disconnect again?
-comtrade_disconnected = False
-disconnect_number = 0
+comtrade_disconnected = True
+disconnect_number = 119
 all_countries = True
 last_country = 0
 
@@ -49,13 +49,13 @@ if comtrade_disconnected:
         reporting_countries_id = reporting_countries_id[disconnect_number:last_country]
         reporting_countries_names = reporting_countries_names[disconnect_number:last_country]
 
-for country in reporting_countries_id:
-    new_request_params = functions.set_params(reporter=country,
+for country in partner_countries_id:
+    new_request_params = functions.set_params(reporter="528",
                                               year="2021",
                                               frequency="A",
                                               classification="HS",
-                                              partners="0",
-                                              imports_or_exports="2",
+                                              partners=country,
+                                              imports_or_exports="1",
                                               classification_code="AG6",
                                               return_format="json",
                                               max_return="10000",
@@ -66,7 +66,11 @@ for country in reporting_countries_id:
     request_param_list.append(new_request_params)
     urls.append(functions.generate_link(new_request_params, False))
 
-counter = 0
+if comtrade_disconnected:
+    counter = disconnect_number
+else:
+    counter = 0
+
 if len(urls) > 90:
     sleepTime = 37
 else:
