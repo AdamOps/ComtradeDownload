@@ -7,17 +7,19 @@ import pandas as pd
 import functions
 from reporting_countries import reporting_country_list
 from partner_countries import partner_country_list
-
+import datetime
 
 # Parameters
 # Did Comtrade disconnect again?
-comtrade_disconnected = True
-disconnect_number = 119
+comtrade_disconnected = False
+disconnect_number = 0
 all_countries = True
 last_country = 0
 
-# os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
-os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
+## Working directory
+username = os.environ.get("USERNAME")
+cd = "C:/Users/" + username + "/OneDrive - SEO/Documenten/GEO Monitor/Data/"
+os.chdir(cd)
 
 # Just for convenience, storing the IDs of all countries in a list.
 # Also storing all request URLs in a list, to then go through them one at a time.
@@ -49,12 +51,12 @@ if comtrade_disconnected:
         reporting_countries_id = reporting_countries_id[disconnect_number:last_country]
         reporting_countries_names = reporting_countries_names[disconnect_number:last_country]
 
-for country in partner_countries_id:
-    new_request_params = functions.set_params(reporter="528",
-                                              year="2021",
+for country in reporting_countries_id:
+    new_request_params = functions.set_params(reporter=country,
+                                              year="2019",
                                               frequency="A",
                                               classification="HS",
-                                              partners=country,
+                                              partners="528",
                                               imports_or_exports="1",
                                               classification_code="AG6",
                                               return_format="json",
@@ -71,10 +73,8 @@ if comtrade_disconnected:
 else:
     counter = 0
 
-if len(urls) > 90:
-    sleepTime = 37
-else:
-    sleepTime = 2
+sleepTime = 40
+
 for link in urls:
     print(link)
     newData = requests.get(link)
@@ -95,11 +95,18 @@ for link in urls:
         break
     counter += 1
     print("Retrieved file #", counter, " out of ", len(urls))
-    hours = math.floor((len(urls)-counter)*sleepTime/3600)
-    minutes = math.floor(((len(urls)-counter)*sleepTime - hours*3600)/60)
-    print("Estimated time left: ", hours, "h", minutes)
+    print("Filename is: ", filename)
+    print("Estimated time left: ", datetime.timedelta(0, (len(urls) - counter)*sleepTime))
     open(filename, "wb").write(newData.content)
+    print("Retrieved file size: ", os.path.getsize(filename))
 
-    # There's a limit to how many requests you can send per hour. With a guest account, it's 100 requests per hour.
-    # With a licensed account, it's 1000.
     time.sleep(sleepTime)
+    if os.path.getsize(filename) < 700:
+        newData = requests.get(link)
+        if len(newData.headers['Content-Length']) < 700:
+            print("Still no data. Very likely actually empty")
+            time.sleep(sleepTime)
+        else:
+            print("Found new data after all. Thanks, Obama.")
+            open(filename, "wb").write(newData.content)
+            time.sleep(sleepTime)

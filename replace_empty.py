@@ -11,31 +11,34 @@ from os import listdir
 from os.path import isfile, join, isdir
 import datetime
 
-os.chdir("C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/")
-# os.chdir("C:/Users/adamk/OneDrive - SEO/Documenten/GEO Monitor/Data")
+## Working directory
+username = os.environ.get("USERNAME")
+cd = "C:/Users/" + username + "/OneDrive - SEO/Documenten/GEO Monitor/Data/"
+os.chdir(cd)
 
-reporting_countries_id = []
-reporting_countries_names = []
-partner_countries_id = []
-partner_countries_names = []
-years = []
-empty_files = []
+## Parameters
+continue_after_abortion = 0
+errors_only = False
+file_threshold = 700
 
+##
 urls = []
-
 file_list = []
 
-cd = "C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/"
+already_retrieved = [f for f in listdir(cd) if isfile(join(cd, f))]
+
+if errors_only:
+    file_threshold = 36
+
 folder_list = [f for f in listdir(cd) if isdir(join(cd, f))]
 for folder in folder_list:
-    if folder.find("json") > 0:
-        files = [x for x in listdir(cd + folder) if isfile(join(cd + folder, x)) and os.path.getsize(cd + folder + "/" + x) < 700 and os.path.getmtime(cd + folder + "/" + x) > 1]
+    if folder.find("json") > 0 and folder == "imports_country_from_world_2020_json":
+        files = [x for x in listdir(cd + folder) if isfile(join(cd + folder, x)) and os.path.getsize(cd + folder + "/" + x) <= file_threshold and x not in already_retrieved]
         for y in files:
             file_list.append(y)
-# for file in file_list:
-    # print(file)
 
-# print(len(file_list))
+for x in file_list:
+    print(x)
 
 request_param_list = []
 years = []
@@ -63,7 +66,7 @@ for file in file_list:
         years.append(year)
         flow_loop_list.append(flow)
 
-for index in range(0, len(reporter_loop_list)):
+for index in range(continue_after_abortion, len(reporter_loop_list)):
     new_request_params = functions.set_params(reporter=reporter_loop_list[index],
                                               year=years[index],
                                               frequency="A",
@@ -81,7 +84,7 @@ for index in range(0, len(reporter_loop_list)):
     urls.append(functions.generate_link(new_request_params, False))
 
 
-counter = 0
+counter = continue_after_abortion
 sleepTime = 40
 
 for link in urls:
@@ -102,7 +105,7 @@ for link in urls:
     else:
         print("Invalid parameters. File-type not recognised. Set the return_format to either json or csv.")
         break
-    print("Retrieved file #", counter, " out of ", len(partner_loop_list))
+    print("Retrieved file #", counter+1, " out of ", len(partner_loop_list))
     print("File name is: ", filename)
     print("Estimated time left: ", datetime.timedelta(0, (len(partner_loop_list) - counter)*sleepTime))
     open(filename, "wb").write(newData.content)
@@ -117,12 +120,8 @@ for link in urls:
         newData = requests.get(link)
         if len(newData.headers['Content-Length']) < 700:
             print("Still no data. Very likely actually empty")
-            empty_files.append(filename)
             time.sleep(sleepTime)
         else:
             print("Found new data after all. Thanks, Obama.")
             open(filename, "wb").write(newData.content)
     counter += 1
-
-for file in empty_files:
-    open("empty_files.txt", "wb").write(file + "\n")

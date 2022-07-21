@@ -4,8 +4,11 @@ import pandas as pd
 from os import listdir
 from os.path import isfile, join
 
-cd = "C:/Users/AdamKuczynski/OneDrive - SEO/Documenten/GEO Monitor/Data/"
+## Working directory
+username = os.environ.get("USERNAME")
+cd = "C:/Users/" + username + "/OneDrive - SEO/Documenten/GEO Monitor/Data/"
 os.chdir(cd)
+
 source_data = cd + "imports_NL_from_country_2021_json/"
 file_list = [f for f in listdir(source_data) if isfile(join(source_data, f))]
 
