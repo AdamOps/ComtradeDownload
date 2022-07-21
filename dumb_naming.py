@@ -12,7 +12,7 @@ dumb_to_good = True
 ## Working directory
 username = os.environ.get("USERNAME")
 cd = "C:/Users/" + username + "/OneDrive - SEO/Documenten/GEO Monitor/Data/"
-source = cd + "imports_country_from_world_2020_json/"
+source = cd + "exports_country_to_world_2019_json/"
 os.chdir(source)
 
 file_list = [f for f in os.listdir(source) if os.path.isfile(os.path.join(source, f))]
@@ -31,7 +31,7 @@ if dumb_to_good:
                 reporter_id = reporter['id']
                 break
 
-        shutil.copy(file, str(reporter_id) + "_imports_from_0_2020.json")
+        shutil.copy(file, str(reporter_id) + "_exports_to_0_2019.json")
 
 
 if good_to_dumb:

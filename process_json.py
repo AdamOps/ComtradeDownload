@@ -19,7 +19,5 @@ for json_file in file_list:
             data_DF = pd.DataFrame(data_file['dataset'])
             without_extension = json_file.rstrip(".json")
             export_name = cd + "imports_NL_from_country_2021_csv/" + without_extension + ".csv"
-            print(export_name)
+            # print(export_name)
             data_DF.to_csv(export_name, sep=";")
-
-
